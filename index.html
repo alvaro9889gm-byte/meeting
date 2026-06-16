@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Let's meet</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+  // =============================================================
+  //  EMAILJS CONFIGURATION — fill these 5 values and you're done
+  // =============================================================
+  //
+  //  1. Sign up free at https://emailjs.com
+  //  2. Add an Email Service (Gmail, Outlook…) -> copy Service ID
+  //  3. Create ONE template:
+  //       To email : {{to_email}}
+  //       Subject  : Meeting preference submitted
+  //       Body     :
+  //         A meeting preference has been submitted:
+  //         - Time:  {{slot}}
+  //         - Place: {{place}}
+  //  4. Copy the Template ID and your Public Key below
+  // =============================================================
+
+  const EMAILJS_PUBLIC_KEY  = 'TtzuDuqBxaBwO4mt_';
+  const EMAILJS_SERVICE_ID  = 'service_k96l0yi';
+  const EMAILJS_TEMPLATE_ID = 'template_6isjenj';
+
+  // The two email addresses that will receive the confirmation
+  const EMAIL_1 = 'alvaro_98gm@hotmail.com';
+  const EMAIL_2 = 'alvaro9889gm@gmail.com';
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:        #111827;
+    --ink-soft:   #374151;
+    --muted:      #9ca3af;
+    --accent:     #0d9488;
+    --accent-dim: #f0fdfa;
+    --accent-mid: #99f6e4;
+    --surface:    #ffffff;
+    --bg:         #f1f5f4;
+    --border:     #e5e7eb;
+    --radius-sm:  8px;
+    --radius:     14px;
+    --radius-lg:  22px;
+    --danger:     #ef4444;
+    --danger-bg:  #fef2f2;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 100px;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    width: 100%; max-width: 580px;
+    display: flex; align-items: center;
+    margin-bottom: 28px;
+  }
+  .progress-step { display: flex; align-items: center; gap: 8px; flex: 1; }
+  .step-circle {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: white; border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    flex-shrink: 0; transition: all 0.3s;
+  }
+  .step-circle.active { border-color: var(--accent); color: var(--accent); }
+  .step-circle.done   { background: var(--accent); border-color: var(--accent); color: white; }
+  .step-label {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--muted); transition: color 0.3s; white-space: nowrap;
+  }
+  .step-label.active { color: var(--accent); }
+  .step-label.done   { color: var(--ink-soft); }
+  .step-line {
+    flex: 1; height: 2px; background: var(--border);
+    margin: 0 8px; border-radius: 2px; overflow: hidden;
+  }
+  .step-line-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.4s ease; }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.08);
+    max-width: 580px; width: 100%; overflow: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--ink);
+    padding: 40px 44px 36px;
+    position: relative; overflow: hidden;
+  }
+  .header::before {
+    content: ''; position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: rgba(13,148,136,0.15); pointer-events: none;
+  }
+  .header::after {
+    content: ''; position: absolute;
+    bottom: -40px; left: 30%;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: rgba(13,148,136,0.08); pointer-events: none;
+  }
+  .header-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(13,148,136,0.2); color: var(--accent-mid);
+    border-radius: 99px; padding: 4px 12px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 16px;
+  }
+  .header-tag-dot {
+    width: 6px; height: 6px; background: var(--accent-mid);
+    border-radius: 50%; animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 36px; font-weight: 300; color: white;
+    line-height: 1.15; letter-spacing: -0.02em;
+  }
+  .header h1 em { font-style: italic; color: var(--accent-mid); }
+  .header p {
+    margin-top: 12px; font-size: 14px;
+    color: rgba(255,255,255,0.5); line-height: 1.65; max-width: 380px;
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 0 44px; }
+
+  /* STEP PANELS */
+  .step-panel { display: none; padding: 40px 44px; }
+  .step-panel.active { display: block; }
+
+  .step-heading { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 24px; }
+  .step-num {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--accent-dim); color: var(--accent);
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .step-title { font-size: 18px; font-weight: 600; color: var(--ink); }
+  .step-sub   { font-size: 13px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+  /* SLOTS */
+  .slots-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .slot {
+    border: 1.5px solid var(--border); border-radius: var(--radius);
+    padding: 16px 18px; cursor: pointer; transition: all 0.15s;
+    position: relative; overflow: hidden;
+  }
+  .slot::before {
+    content: ''; position: absolute; inset: 0;
+    background: var(--accent-dim); opacity: 0; transition: opacity 0.15s;
+  }
+  .slot:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(13,148,136,0.12); }
+  .slot:hover::before { opacity: 1; }
+  .slot.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,0.12); }
+  .slot.selected::before { opacity: 1; }
+  .slot-check {
+    position: absolute; top: 10px; right: 10px;
+    width: 18px; height: 18px; background: var(--accent);
+    border-radius: 50%; display: none; align-items: center; justify-content: center;
+  }
+  .slot.selected .slot-check { display: flex; }
+  .slot-day {
+    font-size: 10px; font-weight: 700; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; position: relative;
+  }
+  .slot-time { font-size: 16px; font-weight: 600; color: var(--ink); position: relative; }
+  .slot-duration { font-size: 11px; color: var(--muted); margin-top: 3px; position: relative; }
+
+  /* PLACES */
+  .places-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .place {
+    border: 1.5px solid var(--border); border-radius: var(--radius);
+    padding: 18px 16px; cursor: pointer; transition: all 0.15s;
+    position: relative; text-align: center;
+  }
+  .place:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 14px rgba(13,148,136,0.12); background: var(--accent-dim); }
+  .place.selected { border-color: var(--accent); background: var(--accent-dim); box-shadow: 0 0 0 3px rgba(13,148,136,0.12); }
+  .place-check {
+    position: absolute; top: 10px; right: 10px;
+    width: 18px; height: 18px; background: var(--accent);
+    border-radius: 50%; display: none; align-items: center; justify-content: center;
+  }
+  .place.selected .place-check { display: flex; }
+  .place-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+  .place-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .place-sub  { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+  /* SUGGEST */
+  .suggest-toggle {
+    display: flex; align-items: center; gap: 8px; margin-top: 12px;
+    cursor: pointer; color: var(--accent);
+    font-size: 13px; font-weight: 600; user-select: none; width: fit-content;
+  }
+  .suggest-toggle-icon { transition: transform 0.2s; font-size: 16px; line-height: 1; }
+  .suggest-toggle.open .suggest-toggle-icon { transform: rotate(45deg); }
+  .suggest-wrap { display: none; margin-top: 10px; }
+  .suggest-wrap.visible { display: block; }
+  .suggest-wrap input {
+    width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    padding: 13px 16px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; color: var(--ink); outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s; background: white;
+  }
+  .suggest-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,0.1); }
+  .suggest-wrap input::placeholder { color: #c4cad3; }
+
+  /* REVIEW BOX */
+  .review-box {
+    background: var(--accent-dim); border: 1.5px solid var(--accent-mid);
+    border-radius: var(--radius); padding: 22px 24px; margin-bottom: 24px;
+  }
+  .review-row {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 10px 0; border-bottom: 1px solid rgba(13,148,136,0.15);
+  }
+  .review-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .review-row:first-child { padding-top: 0; }
+  .review-icon {
+    width: 34px; height: 34px; background: white; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .review-label {
+    font-size: 10px; font-weight: 700; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 2px;
+  }
+  .review-value { font-size: 15px; font-weight: 600; color: var(--ink); }
+
+  /* NAV */
+  .nav-row { display: flex; gap: 10px; align-items: center; margin-top: 28px; }
+  .btn-back {
+    background: none; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    padding: 13px 20px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; color: var(--ink-soft);
+    cursor: pointer; transition: border-color 0.15s, background 0.15s; display: none;
+  }
+  .btn-back:hover { border-color: var(--ink); background: #f9fafb; }
+  .btn-back.visible { display: block; }
+  .btn-next {
+    flex: 1; background: var(--ink); color: white; border: none;
+    border-radius: var(--radius-sm); padding: 14px 22px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: background 0.15s, transform 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btn-next:hover:not(:disabled) { background: #1f2937; transform: translateY(-1px); }
+  .btn-next:disabled { background: #d1d5db; cursor: not-allowed; transform: none; }
+  .btn-next .arrow { transition: transform 0.15s; }
+  .btn-next:hover:not(:disabled) .arrow { transform: translateX(3px); }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+    border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .validation-msg { font-size: 12px; color: var(--danger); margin-top: 10px; display: none; }
+  .error-msg {
+    font-size: 13px; color: var(--danger); background: var(--danger-bg);
+    border: 1px solid #fecaca; border-radius: var(--radius-sm);
+    padding: 12px 16px; margin-top: 12px; display: none; line-height: 1.5;
+  }
+
+  /* DONE */
+  #step-done { display: none; text-align: center; padding: 52px 44px; }
+  #step-done.active { display: block; }
+  .done-icon {
+    width: 72px; height: 72px; background: var(--accent-dim); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; margin: 0 auto 20px;
+  }
+  #step-done h2 {
+    font-family: 'Fraunces', serif; font-size: 28px; font-weight: 300;
+    color: var(--ink); margin-bottom: 8px;
+  }
+  #step-done p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+  .done-summary {
+    background: var(--accent-dim); border: 1.5px solid var(--accent-mid);
+    border-radius: var(--radius); padding: 20px 24px; margin: 28px 0 0; text-align: left;
+  }
+
+  .slot-never {
+    border-color: #fecaca;
+    background: #fff5f5;
+    cursor: pointer;
+  }
+  .slot-never:hover {
+    border-color: var(--danger) !important;
+    background: #fef2f2 !important;
+    box-shadow: 0 4px 14px rgba(239,68,68,0.15) !important;
+    transform: translateY(-2px);
+  }
+  .slot-never:hover::before { opacity: 0 !important; }
+  .slot-never .slot-day { color: #ef4444 !important; }
+  .slot-never .slot-time { color: #b91c1c; }
+
+  @media (max-width: 500px) {
+    .header, .step-panel, #step-done { padding-left: 24px; padding-right: 24px; }
+    .divider { margin: 0 24px; }
+    .slots-grid, .places-grid { grid-template-columns: 1fr; }
+    .header h1 { font-size: 28px; }
+    .step-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Progress -->
+<div class="progress-bar" id="progress-bar">
+  <div class="progress-step">
+    <div class="step-circle active" id="circ-1">1</div>
+    <div class="step-label active" id="lbl-1">Time slot</div>
+  </div>
+  <div class="step-line"><div class="step-line-fill" id="line-1"></div></div>
+  <div class="progress-step">
+    <div class="step-circle" id="circ-2">2</div>
+    <div class="step-label" id="lbl-2">Place</div>
+  </div>
+  <div class="step-line"><div class="step-line-fill" id="line-2"></div></div>
+  <div class="progress-step">
+    <div class="step-circle" id="circ-3">3</div>
+    <div class="step-label" id="lbl-3">Review</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="header">
+    <div class="header-tag">
+      <span class="header-tag-dot"></span>
+      Meeting request
+    </div>
+    <h1>Let's find a time<br>that <em>works for you</em></h1>
+    <p>Three quick steps — pick a slot, choose a place, and we're done.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- STEP 1: Time slot -->
+  <div class="step-panel active" id="step-1">
+    <div class="step-heading">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Choose a time slot</div>
+        <div class="step-sub">Pick whatever works best in your schedule.</div>
+      </div>
+    </div>
+    <div class="slots-grid" id="slots-grid">
+      <div class="slot" data-slot="Thu 18 Jun - 18:30">
+        <div class="slot-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="slot-day">Thu · Jun 18</div><div class="slot-time">18:30</div><div class="slot-duration">30 min</div>
+      </div>
+      <div class="slot" data-slot="Thu 18 Jun - 19:00">
+        <div class="slot-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="slot-day">Thu · Jun 18</div><div class="slot-time">19:00</div><div class="slot-duration">30 min</div>
+      </div>
+      <div class="slot" data-slot="Thu 18 Jun - 19:30">
+        <div class="slot-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="slot-day">Thu · Jun 18</div><div class="slot-time">19:30</div><div class="slot-duration">30 min</div>
+      </div>
+      <div class="slot" data-slot="Thu 18 Jun - 20:00">
+        <div class="slot-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="slot-day">Thu · Jun 18</div><div class="slot-time">20:00</div><div class="slot-duration">30 min</div>
+      </div>
+      <div class="slot" data-slot="Thu 18 Jun - 20:30">
+        <div class="slot-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="slot-day">Thu · Jun 18</div><div class="slot-time">20:30</div><div class="slot-duration">30 min</div>
+      </div>
+      <div class="slot slot-never" id="slot-never">
+        
+        <div class="slot-time">Never</div>
+        
+      </div>
+    </div>
+    <div class="validation-msg" id="never-msg" style="display:none;color:#ef4444;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-top:12px;">
+      This option is unavailable. Please choose one of the time slots above.
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" id="back-1">Back</button>
+      <button class="btn-next" id="next-1" disabled>
+        <span>Choose a place</span><span class="arrow">-></span>
+      </button>
+    </div>
+    <div class="validation-msg" id="val-1">Please select a time slot to continue.</div>
+  </div>
+
+  <!-- STEP 2: Place -->
+  <div class="step-panel" id="step-2">
+    <div class="step-heading">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Where should we meet?</div>
+        <div class="step-sub">Pick a spot or suggest your own.</div>
+      </div>
+    </div>
+    <div class="places-grid" id="places-list">
+      <div class="place" data-place="Cafe">
+        <div class="place-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="place-icon">&#9749;</span>
+        <div class="place-name">Cafe</div><div class="place-sub">Let's have a coffee and check first if you are a weirdo</div>
+      </div>
+      <div class="place" data-place="Bar">
+        <div class="place-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="place-icon">&#127867;</span>
+        <div class="place-name">Bar</div><div class="place-sub">I feel like having 8 beers</div>
+      </div>
+      <div class="place" data-place="Restaurant">
+        <div class="place-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="place-icon">&#127869;</span>
+        <div class="place-name">Restaurant</div><div class="place-sub">The queen feels fancy</div>
+      </div>
+      <div class="place" data-place="Video call">
+        <div class="place-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="place-icon">&#128187;</span>
+        <div class="place-name">Video call</div><div class="place-sub">You don't really feel like seeing me</div>
+      </div>
+    </div>
+    <div class="suggest-toggle" id="suggest-toggle">
+      <span class="suggest-toggle-icon">+</span> Suggest a different place
+    </div>
+    <div class="suggest-wrap" id="suggest-wrap">
+      <input type="text" id="suggest-input" placeholder="e.g. Starbucks on Gran Via, your office..." />
+    </div>
+    <div class="nav-row">
+      <button class="btn-back visible" id="back-2">Back</button>
+      <button class="btn-next" id="next-2" disabled>
+        <span>Review &amp; send</span><span class="arrow">-></span>
+      </button>
+    </div>
+    <div class="validation-msg" id="val-2">Please pick a place or suggest one to continue.</div>
+  </div>
+
+  <!-- STEP 3: Review & send -->
+  <div class="step-panel" id="step-3">
+    <div class="step-heading">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Looks good?</div>
+        <div class="step-sub">Review your choice and hit confirm — we'll send a notification right away.</div>
+      </div>
+    </div>
+    <div class="review-box">
+      <div class="review-row">
+        <div class="review-icon">&#128336;</div>
+        <div>
+          <div class="review-label">Time slot</div>
+          <div class="review-value" id="review-slot">—</div>
+        </div>
+      </div>
+      <div class="review-row">
+        <div class="review-icon">&#128205;</div>
+        <div>
+          <div class="review-label">Place</div>
+          <div class="review-value" id="review-place">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back visible" id="back-3">Back</button>
+      <button class="btn-next" id="submit-btn">
+        <div class="spinner" id="spinner"></div>
+        <span id="btn-label">Confirm &amp; send</span>
+      </button>
+    </div>
+    <div class="error-msg" id="error-msg"></div>
+  </div>
+
+  <!-- DONE -->
+  <div id="step-done">
+    <div class="done-icon">&#9989;</div>
+    <h2>All confirmed!</h2>
+    <p>Your preference has been sent. We'll follow up shortly to lock it in.</p>
+    <div class="done-summary" id="done-summary"></div>
+  </div>
+</div>
+
+<script>
+  emailjs.init(EMAILJS_PUBLIC_KEY);
+
+  let selectedSlot  = null;
+  let selectedPlace = null;
+  let suggestOpen   = false;
+
+  function goTo(n) {
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('step-' + n).classList.add('active');
+    updateProgress(n);
+    if (n === 3) {
+      const suggest = document.getElementById('suggest-input').value.trim();
+      document.getElementById('review-slot').textContent  = selectedSlot || '—';
+      document.getElementById('review-place').textContent = selectedPlace || (suggest ? 'Suggested: ' + suggest : '—');
+    }
+  }
+
+  function updateProgress(n) {
+    for (let i = 1; i <= 3; i++) {
+      const c = document.getElementById('circ-' + i);
+      const l = document.getElementById('lbl-' + i);
+      c.className = 'step-circle' + (i < n ? ' done' : i === n ? ' active' : '');
+      c.textContent = i < n ? '✓' : i;
+      l.className = 'step-label' + (i < n ? ' done' : i === n ? ' active' : '');
+    }
+    document.getElementById('line-1').style.width = n > 1 ? '100%' : '0%';
+    document.getElementById('line-2').style.width = n > 2 ? '100%' : '0%';
+  }
+
+
+  // Step 1 — slots
+  document.getElementById("slots-grid").addEventListener("click", e => {
+    const slot = e.target.closest(".slot");
+    if (!slot) return;
+    if (slot.id === "slot-never") {
+      document.getElementById("never-msg").style.display = "block";
+      return;
+    }
+    document.getElementById("never-msg").style.display = "none";
+    document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
+    slot.classList.add("selected");
+    selectedSlot = slot.dataset.slot;
+    document.getElementById("next-1").disabled = false;
+  });
+  document.getElementById("next-1").addEventListener("click", () => {
+    if (!selectedSlot) { document.getElementById("val-1").style.display = "block"; return; }
+    document.getElementById("val-1").style.display = "none";
+    document.getElementById("never-msg").style.display = "none";
+    goTo(2);
+  });
+  document.getElementById('back-1').addEventListener('click', () => goTo(1));
+
+  // Step 2 — places
+  function checkPlace() {
+    const v = document.getElementById('suggest-input').value.trim();
+    document.getElementById('next-2').disabled = !(selectedPlace || v.length > 0);
+  }
+  document.getElementById('places-list').addEventListener('click', e => {
+    const place = e.target.closest('.place');
+    if (!place) return;
+    document.querySelectorAll('.place').forEach(p => p.classList.remove('selected'));
+    place.classList.add('selected');
+    selectedPlace = place.dataset.place;
+    document.getElementById('suggest-input').value = '';
+    checkPlace();
+  });
+  document.getElementById('suggest-toggle').addEventListener('click', () => {
+    suggestOpen = !suggestOpen;
+    document.getElementById('suggest-toggle').classList.toggle('open', suggestOpen);
+    document.getElementById('suggest-wrap').classList.toggle('visible', suggestOpen);
+    if (suggestOpen) {
+      document.getElementById('suggest-input').focus();
+      document.querySelectorAll('.place').forEach(p => p.classList.remove('selected'));
+      selectedPlace = null;
+    }
+    checkPlace();
+  });
+  document.getElementById('suggest-input').addEventListener('input', () => {
+    if (document.getElementById('suggest-input').value.trim().length > 0) {
+      document.querySelectorAll('.place').forEach(p => p.classList.remove('selected'));
+      selectedPlace = null;
+    }
+    checkPlace();
+  });
+  document.getElementById('next-2').addEventListener('click', () => {
+    const v = document.getElementById('suggest-input').value.trim();
+    if (!selectedPlace && !v) { document.getElementById('val-2').style.display = 'block'; return; }
+    document.getElementById('val-2').style.display = 'none';
+    goTo(3);
+  });
+  document.getElementById('back-2').addEventListener('click', () => goTo(1));
+  document.getElementById('back-3').addEventListener('click', () => goTo(2));
+
+  // Step 3 — submit
+  document.getElementById('submit-btn').addEventListener('click', async () => {
+    const suggest = document.getElementById('suggest-input').value.trim();
+    const place   = selectedPlace || (suggest ? 'Suggested: ' + suggest : null);
+    if (!selectedSlot || !place) return;
+
+    const btn     = document.getElementById('submit-btn');
+    const spinner = document.getElementById('spinner');
+    const label   = document.getElementById('btn-label');
+    const errorEl = document.getElementById('error-msg');
+
+    btn.disabled = true;
+    spinner.style.display = 'block';
+    label.textContent = 'Sending...';
+    errorEl.style.display = 'none';
+
+    const params = { slot: selectedSlot, place: place };
+
+    try {
+      // Send the same email to both addresses sequentially
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { ...params, to_email: EMAIL_1 });
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { ...params, to_email: EMAIL_2 });
+
+      // Show done screen
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('progress-bar').style.display = 'none';
+      document.getElementById('step-done').classList.add('active');
+      document.getElementById('done-summary').innerHTML =
+        '<div class="review-row" style="padding-top:0">' +
+          '<div class="review-icon">&#128336;</div>' +
+          '<div><div class="review-label">Time</div><div class="review-value">' + selectedSlot + '</div></div>' +
+        '</div>' +
+        '<div class="review-row" style="border-bottom:none;padding-bottom:0">' +
+          '<div class="review-icon">&#128205;</div>' +
+          '<div><div class="review-label">Place</div><div class="review-value">' + place + '</div></div>' +
+        '</div>';
+
+    } catch (err) {
+      spinner.style.display = 'none';
+      label.textContent = 'Confirm & send';
+      btn.disabled = false;
+      errorEl.style.display = 'block';
+      errorEl.textContent = "Couldn't send the email. Check your EmailJS config and try again. (" + (err.text || err.message || 'Unknown error') + ")";
+    }
+  });
+</script>
+</body>
+</html>
